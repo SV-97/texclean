@@ -10,6 +10,12 @@ repository = "https://github.com/SV-97/texclean"
 readme = "README.md"
 description = "Recursively clean all LaTeX projects in a given directory"
 
+[package.metadata.wix]
+upgrade-guid = "5E6F766E-73C4-42DF-BF90-F62BFA8CD14B"
+path-guid = "EDE76AFD-CCC4-4115-9D59-1FE960FF8575"
+license = false
+eula = false
+
 [dependencies]
 clap = { version = "4.5.3", features = ["cargo"] }
 inquire = "0.7.1"
@@ -18,3 +24,21 @@ walkdir = "2"
 
 [lints.rust]
 unsafe_code = "forbid"
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
+
+# Config for 'cargo dist'
+[workspace.metadata.dist]
+# The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.10.0"
+# CI backends to support
+ci = ["github"]
+# The installers to generate for each app
+installers = ["shell", "powershell", "homebrew", "msi"]
+# Target platforms to build apps for (Rust target-triple syntax)
+targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+# Publish jobs to run in CI
+pr-run-mode = "plan"

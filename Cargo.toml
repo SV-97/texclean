@@ -1,0 +1,20 @@
+[package]
+name = "texclean"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+keywords = ["tex", "latex", "cli", "cleanup", "clean"]
+categories = ["command-line-utilities"]
+authors = ["Stefan Volz"]
+repository = "https://github.com/SV-97/texclean"
+readme = "README.md"
+description = "Recursively clean all LaTeX projects in a given directory"
+
+[dependencies]
+clap = { version = "4.5.3", features = ["cargo"] }
+inquire = "0.7.1"
+spinoff = "0.8.0"
+walkdir = "2"
+
+[lints.rust]
+unsafe_code = "forbid"

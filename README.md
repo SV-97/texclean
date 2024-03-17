@@ -23,7 +23,7 @@ Just run `texclean` to recursively search for all potential latex auxiliary file
 As of right now the functionality is pretty bare bones because I just quickly threw everything together to where it was "useful enough" for me. Some potential improvements include:
 
 * improving "latex project detection" to decrease the number of false positives (for example by searching for potentially related `.tex` or `.bib` files). Currently a lot of non-latex `.log` files might be included for example
-* adding additional files to remove (I think minted generates some directories that people might want to remove for example)
+* adding additional files to remove
 
 # Installation
 

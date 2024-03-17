@@ -81,7 +81,24 @@ fn main() {
         for path in selected {
             if !dry_run {
                 println!("Removing {}", path);
-                std::fs::remove_file(path).unwrap()
+                if path.as_ref().is_file() {
+                    std::fs::remove_file(path).unwrap()
+                } else if path.as_ref().is_dir() {
+                    if Bytes(fs_extra::dir::get_size(&path).unwrap())
+                        > Bytes::try_from(GiB(1)).unwrap()
+                        && !inquire::Confirm::new(&format!(
+                            "Confirm deletion of large directory {}",
+                            path.as_ref().display()
+                        ))
+                        .prompt()
+                        .unwrap_or(false)
+                    {
+                        println!("Not deleting large directory");
+                        continue;
+                    }
+                    // danger zooone
+                    std::fs::remove_dir_all(path).unwrap()
+                }
             } else {
                 println!("Would remove {}", path);
             }
@@ -91,23 +108,49 @@ fn main() {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+struct GiB(u64);
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+struct Bytes(u64);
+
+#[derive(Debug, Copy, Clone)]
+struct OverflowError;
+
+impl TryFrom<GiB> for Bytes {
+    type Error = OverflowError;
+    fn try_from(value: GiB) -> Result<Self, Self::Error> {
+        value
+            .0
+            .checked_mul(1024 /*MiB*/ * 1024 /*KiB*/ * 1024 /*B*/)
+            .map(Bytes)
+            .ok_or(OverflowError)
+    }
+}
+
 fn is_latex_artifact<P: AsRef<Path>>(file: P) -> bool {
     let path = file.as_ref();
     // yes I should probably turn at least some of this into a regex or 2 but eh
-    path.is_file()
-        && (path
-            .extension()
+
+    (path.is_dir()
+        && path
+            .file_name()
             .and_then(|s| s.to_str())
-            .is_some_and(|extension| match extension {
-                "aux" | "bbl" | "blg" | "log" | "out" | "toc" | "fdb_latexmk" | "soc" => true,
-                _ => false,
-            })
-            || path
+            .is_some_and(|name| name.starts_with("_minted-")))
+        || (path.is_file()
+            && (path.extension().and_then(|s| s.to_str()).is_some_and(
+                |extension| match extension {
+                    "aux" | "bbl" | "blg" | "log" | "out" | "toc" | "fdb_latexmk" | "soc"
+                    | "bcf" => true,
+                    _ => false,
+                },
+            ) || path
                 .file_stem()
                 .and_then(|s| s.to_str())
                 .is_some_and(|stem| stem.starts_with("__latexindent"))
-            || path
-                .file_name()
-                .and_then(|s| s.to_str())
-                .is_some_and(|name| name.ends_with(".run.xml") || name.ends_with(".synctex.gz")))
+                || path
+                    .file_name()
+                    .and_then(|s| s.to_str())
+                    .is_some_and(|name| {
+                        name.ends_with(".run.xml") || name.ends_with(".synctex.gz")
+                    })))
 }

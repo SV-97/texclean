@@ -24,3 +24,13 @@ As of right now the functionality is pretty bare bones because I just quickly th
 
 * improving "latex project detection" to decrease the number of false positives (for example by searching for potentially related `.tex` or `.bib` files). Currently a lot of non-latex `.log` files might be included for example
 * adding additional files to remove (I think minted generates some directories that people might want to remove for example)
+
+# Installation
+
+You can install texclean using [cargo](https://github.com/rust-lang/cargo) (which you can in turn install using [rustup](https://rustup.rs/))
+
+```bash
+cargo install texclean
+```
+
+If the install fails (shouldn't happen, but sometimes it happens) try `cargo install --locked texclean` instead to build with versions exactly as specified in the lockfile. 
